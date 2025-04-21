@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MiniLink | Shortener</title>
+    <style>
+      :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --bg: #f9fafb;
+        --text: #1f2937;
+        --error: #ef4444;
+        --success: #10b981;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 500px;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 2rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        text-align: center;
+      }
+
+      p.subtitle {
+        text-align: center;
+        color: #6b7280;
+        margin-bottom: 2rem;
+      }
+
+      .input-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      }
+
+      button {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      button:hover {
+        background-color: var(--primary-dark);
+      }
+
+      button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      .result {
+        margin-top: 2rem;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        display: none;
+      }
+
+      .result.visible {
+        display: block;
+      }
+
+      .short-url {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+      }
+
+      .url {
+        font-weight: 500;
+        color: var(--primary);
+        word-break: break-all;
+      }
+
+      .copy-btn {
+        background: none;
+        border: none;
+        color: var(--primary);
+        cursor: pointer;
+        padding: 0.5rem;
+        margin-left: 0.5rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .copy-btn:hover {
+        background-color: rgba(99, 102, 241, 0.1);
+      }
+
+      .notification {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        background-color: var(--success);
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+      }
+
+      .notification.visible {
+        opacity: 1;
+      }
+
+      .error-message {
+        color: var(--error);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
+
+      .error-message.visible {
+        display: block;
+      }
+
+      footer {
+        margin-top: 2rem;
+        text-align: center;
+        color: #6b7280;
+        font-size: 0.875rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>MiniLink</h1>
+      <p class="subtitle">Singkatkan link dengan cepat dan mudah</p>
+
+      <form id="shortenerForm">
+        <div class="input-group">
+          <label for="longUrl">URL Asli</label>
+          <input
+            type="text"
+            id="longUrl"
+            placeholder="https://contoh-website-yang-sangat-panjang.com/halaman/artikel"
+            required
+          />
+          <div id="errorMessage" class="error-message">
+            URL tidak valid. Mohon periksa kembali.
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="customAlias">Alias (opsional)</label>
+          <input type="text" id="customAlias" placeholder="nama-pendek" />
+        </div>
+
+        <button type="submit" id="submitBtn">Singkatkan URL</button>
+      </form>
+
+      <div class="result" id="resultContainer">
+        <h3>URL Singkat Anda:</h3>
+        <div class="short-url">
+          <span class="url" id="shortUrl"></span>
+          <button class="copy-btn" id="copyBtn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path
+                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer>&copy; 2025 MiniLink | Dibuat Oleh Rasya Andrean dengan ♥</footer>
+
+    <div class="notification" id="notification">
+      Berhasil disalin ke clipboard!
+    </div>
+
+    <script>
+      // Mock data for demo purposes
+      const mockDb = {
+        links: {},
+      };
+
+      // Generate a random string for URL shortening
+      function generateRandomString(length = 6) {
+        const chars =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let result = "";
+        for (let i = 0; i < length; i++) {
+          result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+      }
+
+      // Validate URL
+      function isValidUrl(url) {
+        try {
+          new URL(url);
+          return true;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      // Main shortener function - in production this would connect to a real backend
+      function shortenUrl(longUrl, customAlias = "") {
+        return new Promise((resolve, reject) => {
+          if (!isValidUrl(longUrl)) {
+            reject("URL tidak valid");
+            return;
+          }
+
+          // Use custom alias or generate random one
+          const alias = customAlias || generateRandomString();
+
+          // In production this would check for alias availability
+          if (customAlias && mockDb.links[customAlias]) {
+            reject("Alias sudah digunakan");
+            return;
+          }
+
+          // Store in our mock DB
+          mockDb.links[alias] = longUrl;
+
+          // Build short URL - in production, this would use your actual domain
+          const shortUrl = `${window.location.origin}/${alias}`;
+
+          // Simulate network delay
+          setTimeout(() => {
+            resolve(shortUrl);
+          }, 800);
+        });
+      }
+
+      // Set up event listeners
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("shortenerForm");
+        const longUrlInput = document.getElementById("longUrl");
+        const customAliasInput = document.getElementById("customAlias");
+        const submitBtn = document.getElementById("submitBtn");
+        const resultContainer = document.getElementById("resultContainer");
+        const shortUrlElement = document.getElementById("shortUrl");
+        const copyBtn = document.getElementById("copyBtn");
+        const notification = document.getElementById("notification");
+        const errorMessage = document.getElementById("errorMessage");
+
+        // Form submission
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const longUrl = longUrlInput.value.trim();
+          const customAlias = customAliasInput.value.trim();
+
+          errorMessage.classList.remove("visible");
+
+          if (!isValidUrl(longUrl)) {
+            errorMessage.classList.add("visible");
+            return;
+          }
+
+          // Disable button and show loading state
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Memproses...";
+
+          try {
+            const shortUrl = await shortenUrl(longUrl, customAlias);
+
+            // Display result
+            shortUrlElement.textContent = shortUrl;
+            resultContainer.classList.add("visible");
+
+            // Reset form
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Singkatkan URL";
+          } catch (error) {
+            errorMessage.textContent = error;
+            errorMessage.classList.add("visible");
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Singkatkan URL";
+          }
+        });
+
+        // Copy to clipboard
+        copyBtn.addEventListener("click", () => {
+          const shortUrl = shortUrlElement.textContent;
+
+          navigator.clipboard.writeText(shortUrl).then(() => {
+            // Show notification
+            notification.classList.add("visible");
+
+            // Hide notification after 2 seconds
+            setTimeout(() => {
+              notification.classList.remove("visible");
+            }, 2000);
+          });
+        });
+
+        // Validate URL on input
+        longUrlInput.addEventListener("input", () => {
+          errorMessage.classList.remove("visible");
+        });
+      });
+    </script>
+  </body>
+</html>
