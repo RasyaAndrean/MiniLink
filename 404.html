@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting...</title>
+    <script>
+      // GitHub Pages 404 handler: convert path-based URLs to hash-based
+      // e.g., /MiniLink/abc123 -> /MiniLink/#abc123
+      var path = window.location.pathname;
+      var repo = "/MiniLink";
+      var code = path.replace(repo, "").replace(/^\//, "");
+      if (code) {
+        window.location.replace(repo + "/#" + code);
+      } else {
+        window.location.replace(repo + "/");
+      }
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+  </body>
+</html>
