@@ -28,10 +28,8 @@ Cocok untuk penggunaan personal, demo, atau sebagai referensi belajar web develo
 ## Preview
 
 <p align="center">
-  <img src="https://rasyaandrean.github.io/MiniLink/preview.png" alt="MiniLink Preview" width="500" />
+  <img src="preview.png" alt="MiniLink Preview" width="500" />
 </p>
-
-> Belum ada screenshot? Buka situs, ambil screenshot, lalu simpan sebagai `preview.png` di root repo.
 
 ## Fitur
 
